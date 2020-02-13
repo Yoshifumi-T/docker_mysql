@@ -1,0 +1,33 @@
+name: Push Docker Image
+
+on:
+  push:
+    branches:
+    - master
+    paths-ignore:
+    - '**.md'
+ 
+env:
+  DOCKERE_HUB_BASE_NAME: yoshifumi0106/mysql
+  TAG_NAME: latest
+
+jobs:
+  push:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Build base image
+      run: |
+        docker build . -t ${DOCKERE_HUB_BASE_NAME}:${TAG_NAME}
+
+    - name: Login to Registrie
+      env:
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      run: |
+        echo "${DOCKER_HUB_TOKEN}" | docker login -u yoshifumi0106 --password-stdin
+    
+    - name: Push to Docker Hub
+      run: docker push ${DOCKERE_HUB_BASE_NAME}:${TAG_NAME} 
